@@ -1,0 +1,62 @@
+# ----------------------------------------------------
+# AEM Editorial Toolbar - Environment Configuration Template
+# (environment-config-template.yaml)
+#
+# This is a clean template for setting up your AEM environments.
+# Copy this file to environment-config.yaml and customize for your setup.
+# ----------------------------------------------------
+
+# 'authors' section:
+# List your AEM author environments and their hosts.
+# A bare hostname implies https. For http or a non-standard port, write the
+# full origin including the scheme (a port without a scheme is rejected).
+# The features that ask the instance itself (the auth check, DAM asset lookups,
+# content fragment references, page properties) may only call the origin an
+# entry denotes, so a bare hostname covers them only on an instance that really
+# is https on the default port.
+authors:
+  prod:   [author.yourcompany.com]              # Your Production AEM author hostname
+  stage:  [author-stage.yourcompany.com]        # Your Staging AEM author hostname
+  dev:    [author-dev.yourcompany.com]          # Your Development AEM author hostname
+  local:  [http://localhost:4502]               # Local AEM SDK (usually correct as-is)
+
+# 'sites' section:
+# Define your websites. The site key should match your AEM /content folder name.
+sites:
+  # Replace 'yoursite' with your actual site folder name from /content/yoursite
+  yoursite:
+    
+    # stripPath (optional):
+    # Remove path segments that exist in author URLs but not in public URLs
+    # Common examples:
+    #   stripPath: /en     # Remove language code
+    #   stripPath: /us     # Remove region code  
+    #   stripPath: /       # No stripping needed
+    stripPath: /en
+    
+    # pathTransforms (optional):
+    # Apply URL transformations when going from author to public
+    # The toolbar also maps a live path back for Edit Page, so prefer a rule
+    # that maps back: this prefix swap round-trips at every depth
+    # pathTransforms:
+    #   - authorPattern: "^/secure-content"
+    #     liveReplacement: "/public-content"
+    
+    # Public website domains for each environment
+    public:
+      prod:  [www.yoursite.com]                  # Production website domain
+      stage: [stage.yoursite.com]               # Staging website domain
+      dev:   [dev.yoursite.com]                 # Development website domain
+      local: [http://localhost:3000]            # Local development server
+
+# 'environments' section (optional):
+# Customize toolbar colors for different environments
+environments:
+  prod:
+    color: "#D32F2F" # Red - be careful in production!
+  stage:
+    color: "#FF8F00" # Orange - staging environment
+  dev:
+    color: "#388E3C" # Green - safe to experiment
+  local:
+    color: "#1976D2" # Blue - local development
