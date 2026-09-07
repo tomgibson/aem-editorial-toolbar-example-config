@@ -1,0 +1,108 @@
+# ----------------------------------------------------
+# AEM Editorial Toolbar - Link Matrix
+# (link-matrix.yaml)
+#
+# Defines contextual links and actions that appear in the toolbar.
+# Items are grouped by "LocationContext/SubContext" (defined in region-map.yaml).
+#
+# --- Link Properties ---
+#   label: Text displayed for the item. Resolves the same placeholders as
+#          urlTemplate; an item whose label resolves to nothing is dropped.
+#
+#   urlTemplate: URL for links. Can contain placeholders.
+#                Required for links, not used for actions.
+#                Available Placeholders:
+#                  {LIVE_URL}, {AUTHOR_EDIT_URL}, {AUTHOR_ASSET_URL},
+#                  {AUTHOR_PAGE_PROPERTIES_URL}, {AUTHOR_SITE_ADMIN_URL},
+#                  {AUTHOR_ASSETS_ADMIN_URL}, {AUTHOR_XF_ADMIN_URL},
+#                  {instanceOrigin} (scheme, host and port of the matched
+#                  instance), {page.<name>} (see Page Property Placeholders
+#                  below)
+#                The detected context's own fields resolve too - {environment},
+#                {siteKey}, {subContext}, {locationContext}, {stripPath},
+#                {url}, {instanceHostname} - as does {extractedData.<key>}
+#                from a region rule. {attr.<name>} is a message-matrix.yaml
+#                placeholder only; a link does not resolve it.
+#                A resolved URL must name http, https, mailto or no scheme at
+#                all; anything else drops the item rather than rendering it.
+#
+#   condition: (optional) Assertion that must pass for the item to appear.
+#              Same operators as message-matrix.yaml, and the same tolerance: a
+#              condition the toolbar cannot judge - a field its operator needs
+#              left blank, an operator misspelled, a selector that is not valid
+#              CSS - drops the item and is named once in the browser console,
+#              rather than being read as false and turned over by 'negate'.
+#
+#   icon: (optional) Icon key to display next to the item.
+#         Available Icons: "world", "edit", "dam", "folder", "info",
+#                          "properties", "alert", "contentFragment",
+#                          "link" (default)
+#
+# --- Action Properties (for toggle buttons) ---
+#   actionId: ID of the action to execute. If present, this is an action not a link.
+#             Available Actions: "toggleAssetLinks"
+#
+#   labelActive: (optional) Label to show when action is active.
+#
+#   iconActive: (optional) Icon to show when action is active.
+#
+# --- Page Property Placeholders ---
+#   {page.<name>} resolves to one of the AEM page's own properties, read from
+#   the page itself on author pages (e.g. {page.cq:template}). It can be
+#   written in urlTemplate, label, labelActive and in a condition's values.
+#
+#   An item naming a property the page does not carry is not rendered at all,
+#   so one link can be configured site-wide and stay silent everywhere the
+#   convention it relies on is absent. A property an editor has cleared counts
+#   as absent, and a multi-value property resolves to its first value.
+#
+#   The options page ("Links & Messages") can pick a property off a real page
+#   and shows what a label or URL resolves to on it.
+# ----------------------------------------------------
+
+public/page:
+  - label: "Edit Page"
+    urlTemplate: "{AUTHOR_EDIT_URL}"
+    icon: "edit"
+  - label: "Page Properties"
+    urlTemplate: "{AUTHOR_PAGE_PROPERTIES_URL}"
+    icon: "info"
+  - label: "Open Enclosing Directory"
+    urlTemplate: "{AUTHOR_SITE_ADMIN_URL}"
+    icon: "folder"
+  - label: "Show Asset Links"
+    labelActive: "Hide Asset Links"
+    actionId: "toggleAssetLinks"
+    icon: "dam"
+
+public/damAsset:
+  - label: "Edit in DAM"
+    urlTemplate: "{AUTHOR_ASSET_URL}"
+    icon: "dam"
+  - label: "Open Enclosing Directory"
+    urlTemplate: "{AUTHOR_ASSETS_ADMIN_URL}"
+    icon: "folder"
+
+author/damAssetEditor:
+  - label: "View Assets Admin"
+    urlTemplate: "{AUTHOR_ASSETS_ADMIN_URL}"
+    icon: "folder"
+
+author/pagePreview:
+  - label: "View Live"
+    urlTemplate: "{LIVE_URL}"
+    icon: "world"
+  - label: "Page Properties"
+    urlTemplate: "{AUTHOR_PAGE_PROPERTIES_URL}"
+    icon: "info"
+  - label: "Edit Page"
+    urlTemplate: "{AUTHOR_EDIT_URL}"
+    icon: "edit"
+
+author/pageEditor:
+  - label: "View Live"
+    urlTemplate: "{LIVE_URL}"
+    icon: "world"
+  - label: "Page Properties"
+    urlTemplate: "{AUTHOR_PAGE_PROPERTIES_URL}"
+    icon: "info"

@@ -1,0 +1,12 @@
+{
+  "name": "Sample AEM Toolbar Config",
+  "version": "1.0.0",
+  "description": "Example configuration package for AEM Editorial Toolbar",
+  "author": "Your Team Name",
+  "configs": {
+    "environmentConfig": "./environment-config.yaml",
+    "linkMatrix": "./link-matrix.yaml",
+    "messageMatrix": "./message-matrix.yaml",
+    "regionMap": "./region-map.yaml"
+  }
+}

@@ -1,0 +1,53 @@
+# ----------------------------------------------------
+# AEM Region Map: Defines page sub-contexts (e.g., editor, preview, DAM).
+# Rules determine which sub-context is active. Highest priority wins if multiple match.
+# Each rule must declare at least one condition (segments, pathRegex, queryRegex, endsWith);
+# a rule with none is rejected by validation and would match nothing.
+# Segment indices are 1-based. -1 is the last segment. mustMatch defaults to false.
+# ----------------------------------------------------
+
+author: # === Rules for AEM Author Environment ===
+  pageEditor: # Standard AEM Page Editor (NOT Experience Fragments)
+    segments:
+      - { segment: 1, value: "editor.html", mustMatch: true }
+      - { segment: 3, value: "experience-fragments", mustMatch: false } # Skips /content/<site>/experience-fragments/...
+  xfEditor: # AEM Experience Fragment Editor
+    segments:
+      - { segment: 1, value: "editor.html", mustMatch: true }
+      - { segment: 3, value: "experience-fragments", mustMatch: true } # Path includes /content/<site>/experience-fragments/...
+  pagePreview: # AEM "View as Published" preview mode
+    segments:
+      - { segment: 1, value: "content", mustMatch: true }      # Path starts /content/...
+      - { segment: 1, value: "editor.html", mustMatch: false } # ...and NOT /editor.html/
+    endsWith: [".html"]
+  pageProperties: # AEM Page Properties dialog
+    segments:
+      - { segment: 7, value: "properties.html", mustMatch: true } # Looks for /..6/..../properties.html
+  siteBrowser: # AEM Sites Console (sites.html)
+    segments:
+      - { segment: 1, value: "sites.html", mustMatch: true }
+  damBrowser: # AEM Assets Console (assets.html)
+    segments:
+      - { segment: 1, value: "assets.html", mustMatch: true }
+  damAssetEditor: # AEM Asset Details page
+    segments:
+      - { segment: 1, value: "assetdetails.html", mustMatch: true }
+  damAssetProps: # AEM Asset Metadata Editor
+    # AEM appends the asset path after the selector, e.g.
+    # /mnt/overlay/dam/gui/content/assets/metadataeditor.external.html/content/dam/photo.jpg
+    pathRegex: "/assets/metadataeditor\\.external\\.html(?:/|$)"
+
+public: # === Rules for Public (Live/Preview) Websites ===
+  damAsset: # Direct links to DAM assets (images, PDFs, etc.)
+    segments:
+      - { segment: 1, value: "content", mustMatch: true } # Path starts /content/dam/...
+      - { segment: 2, value: "dam", mustMatch: true }
+    endsWith: [".pdf", ".gif", ".jpeg", ".jpg", ".png"]
+  page: # General public-facing web pages
+    # Order/priority matters here if a URL could match multiple 'page' rules.
+    - endsWith: [".html", ".htm"]           # Standard pages with .html extension
+      priority: 10
+    - pathRegex: "^/$"                      # Homepage (exact root path)
+      priority: 15
+    - pathRegex: "^/(?:[^/]+/)*[^/.]+$"     # Extensionless URLs (e.g., /products/item)
+      priority: 5

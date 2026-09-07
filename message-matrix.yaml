@@ -1,0 +1,318 @@
+# ----------------------------------------------------
+# AEM Editorial Toolbar - Message Matrix
+# (message-matrix.yaml)
+#
+# This file defines contextual messages that appear in the toolbar
+# based on conditions met on the current AEM page.
+# ----------------------------------------------------
+#
+# Messages are grouped by "LocationContext/SubContext".
+# Common LocationContexts: 'author', 'public'
+# Common SubContexts: 'pageEditor', 'pagePreview', 'assetEditor', 'sitesAdmin', 'damAdmin', 'genericPage', etc.
+# (These SubContexts are defined by rules in your 'region-map.yaml')
+#
+# ----------------------------------------------------
+# Assertion Operators Guide
+#
+# Assertions define conditions for showing messages or links.
+#
+# --- Common Optional Properties for ALL Assertions ---
+#   negate: true          # Inverts the result (e.g., show if element DOES NOT exist). Default is false.
+#   iframeSelector: "#id" # For element assertions: CSS selector to target an element WITHIN an iframe.
+#                         # Example: iframeSelector: "#ContentFrame"
+#
+# --- Available Assertion Operators ---
+#
+# 1. operator: "elementExists"
+#    Checks if an element exists.
+#    Requires:
+#      value: "css-selector"       # e.g., ".my-component", "h1#page-title"
+#
+# 2. operator: "elementMissing"
+#    Checks if an element does NOT exist.
+#    Requires:
+#      value: "css-selector"
+#
+# 3. operator: "elementContainsText"
+#    Checks if an element's text content includes specific text.
+#    Requires:
+#      value: "css-selector"
+#      text: "text to find"        # e.g., "Error", "Welcome User"
+#
+# 4. operator: "elementAttributeContains"
+#    Checks if an element's attribute value includes specific text.
+#    Requires:
+#      value: "css-selector"
+#      attributeName: "attr-name"  # e.g., "href", "class", "data-status"
+#      text: "text in attribute"   # e.g., "/legacy/", "active", "error"
+#
+# 5. operator: "urlContains"
+#    Checks if the FULL current page URL contains specific text.
+#    Requires:
+#      value: "text in url"        # e.g., "preview=true", "my-site.com/path"
+#
+# 6. operator: "urlPathContains"
+#    Checks if the PATH part of the current page URL contains specific text.
+#    (Path is everything after hostname, before '?' query string).
+#    Requires:
+#      value: "text in path"       # e.g., "/content/mysite/en", ".html"
+#
+# 7. operator: "urlQueryParamEquals"
+#    Checks if a URL query parameter has an EXACT value.
+#    Requires:
+#      value: "param-name"         # e.g., "wcmmode", "debug"
+#      paramValue: "exact-value"   # e.g., "disabled", "true"
+#
+# 8. operator: "localStorageEquals"
+#    Checks if a localStorage item has an EXACT value.
+#    Requires:
+#      value: "item-key"           # Key of the localStorage item
+#      itemValue: "exact-value"    # Expected string value
+#
+# 9. operator: "sessionStorageEquals"
+#    Checks if a sessionStorage item has an EXACT value.
+#    Requires:
+#      value: "item-key"           # Key of the sessionStorage item
+#      itemValue: "exact-value"    # Expected string value
+#
+# 10. operator: "windowVarEquals"
+#     Checks if a global JavaScript variable (or nested property) has an EXACT value.
+#     Requires:
+#       value: "variable.path"    # e.g., "digitalData.page.version", "myGlobalFlag"
+#       varValue: exact-value     # Expected value (string, number, boolean).
+#                                 # For objects/arrays, use a stringified JSON representation
+#                                 # if comparing against an actual object/array on the page.
+#                                 # e.g., varValue: '{"key":"val"}' or varValue: true
+#
+# --- What happens to a rule the toolbar cannot judge ---
+#   Nothing validates this file, so a rule reaches the toolbar exactly as it
+#   was typed. One the toolbar cannot judge is dropped: its message is not
+#   shown, and the browser console names the rule once, whatever 'negate' says.
+#   'negate' inverts a verdict the toolbar actually reached, so a rule with a
+#   mistake in it can never be read as false, turned over, and fired on every
+#   page in the context.
+#
+#   A rule is dropped when:
+#     - a field listed under 'Requires' above is missing, or left blank (the
+#       three exceptions are named below)
+#     - the operator is not one of the ten above (usually a misspelling)
+#     - the CSS selector in 'value' is not valid CSS ('elementMissing' is the
+#       exception below)
+#     - 'iframeSelector' names an iframe the page does not carry, or one whose
+#       document cannot be read; it is judged in full again on the next page
+#       load, or on the next change to the toolbar's own document if it carries
+#       'activeListen'
+#     - evaluating it throws, e.g. a 'windowVarEquals' reaching across a
+#       cross-origin frame, or storage the browser has blocked
+#
+#   A field cleared to an empty string counts as one that was never written,
+#   so 'text: ""' drops the rule rather than matching every element: everything
+#   contains the empty string, and an 'elementContainsText' judged on one would
+#   quietly become an 'elementExists'. The three fields compared for an exact
+#   value are the exception - paramValue, itemValue and varValue - because
+#   '?param=' and an item stored empty both read back as an empty string, so
+#   those may be written empty. Left out altogether, or written with nothing
+#   after the colon, they still drop the rule.
+#
+#   'elementMissing' is the one operator that reads an invalid selector rather
+#   than dropping the rule over it: nothing can match a selector the browser
+#   cannot parse, so the rule reads it as missing and fires, and the console
+#   says so in those words. Every other operator naming an element drops the
+#   rule instead.
+#
+# --- Compound Assertions (for complex logic) ---
+#   You can combine multiple assertions using AND/OR.
+#   Example:
+#   assertion:
+#     logicalOperator: "AND"  # Can also be "OR"
+#     assertions:
+#       - operator: "urlContains"
+#         value: "editor.html"
+#       - operator: "elementExists"
+#         value: "#SomeSpecificEditorElement"
+#
+#   'assertions' must be a list. A compound rule carrying no list at all, or a
+#   mapping or a bare string where the list belongs, is dropped like any other
+#   rule the toolbar cannot judge. An 'assertions: []' written deliberately
+#   keeps its plain meaning: an AND with nothing to check passes, an OR fails.
+#
+#   A sub-assertion the toolbar cannot judge is dropped on its own account and
+#   stays in the list, so an AND carrying one fails rather than passing as
+#   though the branch had never been written.
+#
+#   A YAML anchor aliased back inside the rule that defines it makes a tree
+#   with no end. Such a rule is dropped once the toolbar has walked 500 nodes
+#   of it, rather than being followed until the page stops responding.
+#
+# ----------------------------------------------------
+# Watching the Page: activeListen
+# ----------------------------------------------------
+#
+# activeListen: true on a message judges its assertion again on every debounced
+# batch of changes to the document the toolbar is running in, so the message
+# appears and clears as that document changes rather than only on load. Without
+# it a rule is judged once, when the toolbar starts.
+#
+#   -
+#     message: "The hero is still on the draft variant."
+#     messageType: "warning"
+#     icon: "alert"
+#     activeListen: true
+#     assertion:
+#       operator: "elementExists"
+#       value: ".hero[data-variant='draft']"
+#
+# --- Notes ---
+#   - The watch is on the document the toolbar itself is running in, which is
+#     the page itself on a published page and on the author instance's own
+#     preview. In the page editor it is the editor around the content frame,
+#     so a change confined to that frame sets off nothing, whatever
+#     'iframeSelector' the rule carries
+#   - The toolbar ignores its own markup while watching, and the message is
+#     removed again as soon as the rule stops passing
+#   - Use it for state that changes in place. A rule about something that only
+#     changes on navigation does not need it
+#
+# ----------------------------------------------------
+# Extracting Values from the Asserted Element
+# ----------------------------------------------------
+#
+# You can extract attribute values from the element matched by your assertion
+# and display them in your message. This uses {attr.attributeName} syntax,
+# which follows JavaScript conventions (like element.getAttribute()).
+#
+# --- Syntax ---
+#   {attr.attributeName}    Extracts the specified attribute from the asserted element
+#   {attr.textContent}      Special: extracts the element's text content
+#
+# --- How it works ---
+#   1. Your assertion targets an element (e.g., elementExists with a CSS selector)
+#   2. When the assertion passes, the element is found
+#   3. Any {attr.xxx} placeholders in your message are replaced with values from that element
+#
+# --- Examples ---
+#
+#   Example 1: Show the value of an OG meta tag
+#   -
+#     message: "OG Description: {attr.content}"
+#     messageType: "info"
+#     assertion:
+#       operator: "elementExists"
+#       value: "meta[property='og:description']"
+#
+#   Example 2: Show a data attribute value
+#   -
+#     message: "Page status: {attr.data-status}"
+#     messageType: "info"
+#     assertion:
+#       operator: "elementExists"
+#       value: "[data-status]"
+#
+#   Example 3: Show text content of an element
+#   -
+#     message: "Page title: {attr.textContent}"
+#     messageType: "info"
+#     assertion:
+#       operator: "elementExists"
+#       value: "h1.page-title"
+#
+#   Example 4: Combine with Active Listener to show dynamic values
+#   -
+#     message: "Current state: {attr.data-state}"
+#     messageType: "info"
+#     activeListen: true
+#     assertion:
+#       operator: "elementExists"
+#       value: "#app-container[data-state]"
+#
+# --- Notes ---
+#   - Only works with element-based assertions (elementExists, elementContainsText,
+#     elementAttributeContains). 'elementMissing' matches no element, so it has
+#     none to read from
+#   - For compound assertions, the value is read off the element the rule
+#     actually matched on: the branch an OR passed on, or the first
+#     element-based branch of an AND, since every branch of an AND passed
+#   - A branch that did not pass never lends its element to the message, and
+#     nor does an 'elementExists' with 'negate: true', which passes precisely
+#     because its element is absent, nor one asking about something other than
+#     the DOM (urlContains and friends). A rule that passed without matching an
+#     element leaves the placeholder empty rather than showing a value from
+#     somewhere else in the tree
+#   - 'elementContainsText' and 'elementAttributeContains' with 'negate: true'
+#     do lend their element: such a rule passes while its element is on the
+#     page and only its content falls short, so {attr.xxx} reads that element.
+#     On a page where the element is absent the placeholder is empty again
+#   - If the attribute doesn't exist, the placeholder will be empty
+#   - You can still use context placeholders like {url}, {environment} or
+#     {page.someProperty} alongside {attr.xxx}
+#   - An assertion carrying an 'iframeSelector' is evaluated inside that iframe
+#     and its {attr.xxx} values are read off the element in that same iframe,
+#     so a rule scoped to the editor iframe and a rule scoped to the top
+#     document can sit in one tree without either reading the other's document
+#
+# --- Deprecated Syntax (still supported, will be removed in future) ---
+#   The old extractFromAssertedElement config is still supported for backwards compatibility:
+#
+#   -
+#     message: "Value: {myValue}"
+#     assertion:
+#       operator: "elementExists"
+#       value: "meta[name='test']"
+#     extractFromAssertedElement:
+#       myValue:
+#         attribute: "content"
+#
+#   This is equivalent to using {attr.content} directly. Prefer the new {attr.xxx} syntax.
+#
+# ----------------------------------------------------
+# Page Property Placeholders
+# ----------------------------------------------------
+#
+# {page.<name>} resolves to one of the AEM page's own properties, read from the
+# page itself on author pages. Property names carry ':' and '-', so everything
+# after the prefix is the name, e.g. {page.cq:template} or {page.jcr:title}.
+#
+# --- Where it can be written ---
+#   - In the message text, alongside {attr.xxx} and the context placeholders
+#   - In the urlTemplate that makes a message clickable
+#   - In an assertion's values, including a CSS selector
+#
+# --- The rule that makes one configuration safe site-wide ---
+#   A message whose text, URL or assertion names a property the page does not
+#   carry is not shown at all, rather than shown with a hole in it. A property
+#   an editor has cleared counts as one the page does not carry, and a
+#   multi-value property resolves to its first value.
+#
+#   The properties are read after the toolbar is already on screen, so a
+#   message naming one joins the toolbar a moment later than the rest.
+#
+# --- Example: show the path a page carries as a property ---
+#   -
+#     message: "Related fragment: {page.eventDetailsContentFragmentPath}"
+#     messageType: "info"
+#     assertion:
+#       operator: "urlContains"
+#       value: "/editor.html/"
+#
+# ----------------------------------------------------
+
+author/pagePreview: # Messages for AEM Page Preview mode (e.g., view as published)
+  # --- Example 1: Warning if 'wcmmode=disabled' is missing from URL
+  -
+    message: "Previewing without ?wcmmode=disabled. Click to add it for a true published view."
+    messageType: "warning"
+    icon: "alert"
+    urlTemplate: "?wcmmode=disabled" # Makes the message clickable, appending this to the current URL
+    assertion:
+      operator: "urlContains"   # Check if the current page URL contains a string
+      value: "wcmmode=disabled" # The string to check for in the URL
+      negate: true              # Show message if 'wcmmode=disabled' is NOT in the URL
+
+public/page: # Messages for public-facing pages
+  # --- Example: Display meta description from page
+  -
+    message: "Example Meta Description: {attr.content}"
+    messageType: "info"
+    assertion:
+      operator: "elementExists"
+      value: "meta[name='description']"
